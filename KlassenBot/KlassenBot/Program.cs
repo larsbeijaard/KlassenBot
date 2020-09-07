@@ -11,7 +11,7 @@ namespace KlassenBot
 {
     class Program
     {
-        private DiscordSocketClient m_Client;
+        public static DiscordSocketClient S_SOCKET_CLIENT;
         private CommandService m_Commands;
         private IServiceProvider m_Service;
 
@@ -23,28 +23,28 @@ namespace KlassenBot
         /// </summary>
         public async Task RunAsync()
         {
-            m_Client = new DiscordSocketClient();
+            S_SOCKET_CLIENT = new DiscordSocketClient();
             m_Commands = new CommandService();
 
             // Make sure there is only one instance of each necessary item
             m_Service = new ServiceCollection()
-                .AddSingleton(m_Client)
+                .AddSingleton(S_SOCKET_CLIENT)
                 .AddSingleton(m_Commands)
                 .BuildServiceProvider();
 
             // Get the bot token from a hidden file, just to be sure ;)
             string _botToken = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "bot-token.tkn");
 
-            m_Client.Log += ClientLog;
+            S_SOCKET_CLIENT.Log += ClientLog;
 
             await RegisterCommandAsync();
 
             // Login and start the bot
-            await m_Client.LoginAsync(TokenType.Bot, _botToken);
-            await m_Client.StartAsync();
+            await S_SOCKET_CLIENT.LoginAsync(TokenType.Bot, _botToken);
+            await S_SOCKET_CLIENT.StartAsync();
 
             // Set the bot's playing status
-            await m_Client.SetGameAsync("Type !help om van start te gaan!");
+            await S_SOCKET_CLIENT.SetGameAsync("Type !help om van start te gaan!");
 
             // Make sure the bot doesnt close instantly after start
             await Task.Delay(-1);
@@ -61,7 +61,7 @@ namespace KlassenBot
         /// </summary>
         public async Task RegisterCommandAsync()
         {
-            m_Client.MessageReceived += HandleCommandAsync;
+            S_SOCKET_CLIENT.MessageReceived += HandleCommandAsync;
 
             await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_Service);
         }
@@ -72,7 +72,7 @@ namespace KlassenBot
         private async Task HandleCommandAsync(SocketMessage _args)
         {
             var _msg = (SocketUserMessage)_args;
-            var _context = new SocketCommandContext(m_Client, _msg);
+            var _context = new SocketCommandContext(S_SOCKET_CLIENT, _msg);
 
             // Make sure the bot doesnt reply to itself
             if (_msg.Author.IsBot)
