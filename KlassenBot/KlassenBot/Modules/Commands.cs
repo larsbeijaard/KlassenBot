@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 
 namespace KlassenBot.Modules
 {
@@ -38,7 +39,7 @@ namespace KlassenBot.Modules
         /// <summary>
         /// Set your class
         /// </summary>
-        /// <param name="_class"> Your class</param>
+        /// <param name="_class"> Your class </param>
         [Command("klas")]
         public async Task AssignClass(string _class)
         {
@@ -63,6 +64,7 @@ namespace KlassenBot.Modules
                     {
                         await ((IGuildUser)_user).AddRoleAsync(_role);
                         await ReplyAsync("Jij zit nu in klas " + _class.ToUpper());
+
                     }
                 }
                 // If the role is invalid, let the user know
@@ -71,10 +73,13 @@ namespace KlassenBot.Modules
                     await ReplyAsync("Deze klas bestaat niet! Snap je het niet? Type **!help** voor informatie!");
                 }
             }
-            // If there does anything wrong, the developer will know (to be made: throughout a private message)
-            catch (System.Exception _e)
+            // If there does anything wrong, the developer will know throughout a private message
+            catch (Exception _e)
             {
                 await ReplyAsync("Oeps er ging iets helemaal verkeerd!");
+
+                SocketUser _userID = Program.S_SOCKET_CLIENT.GetUser(368317619838779393);
+                await UserExtensions.SendMessageAsync(_userID, _e.Message);
             }
         }
 
